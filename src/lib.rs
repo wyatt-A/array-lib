@@ -3,6 +3,8 @@
     The number of dimensions is static for efficient address calculations
     This is useful for batched matrix calculations and image/signal processing routines
  */
+#[cfg(feature = "io-nifti")]
+pub mod io_nifti;
 
 const N_DIMS:usize = 16;
 
