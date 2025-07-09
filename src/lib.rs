@@ -66,6 +66,17 @@ mod tests {
         assert_eq!(addr,3);
     }
 
+    #[test]
+    fn t_fftshift() {
+        let dims = ArrayDim::from_shape(&[6,4,5]);
+        let coord = [0,0,0];
+        let mut out = [0,0,0];
+        dims.fft_shift_coords(&coord,&mut out);
+        let mut inv = [0,0,0];
+        dims.ifft_shift_coords(&out,&mut inv);
+        assert_eq!(inv,coord);
+    }
+
 }
 
 #[derive(Clone,Copy,Debug)]
@@ -159,6 +170,24 @@ impl ArrayDim {
     /// allocates a vector of values the size of dims
     pub fn alloc<T:Sized + Clone>(&self,value:T) -> Vec<T> {
         vec![value;self.numel()]
+    }
+
+    #[inline]
+    pub fn fft_shift_coords(&self,input: &[usize], out: &mut [usize]) {
+        debug_assert!(input.len() <= N_DIMS);
+        debug_assert!(out.len() <= N_DIMS);
+        for ((o, &i), &d) in out.iter_mut().zip(input).zip(self.shape.iter()) {
+            *o = (i + d / 2) % d;          // forward shift
+        }
+    }
+
+    #[inline]
+    pub fn ifft_shift_coords(&self, input: &[usize], out: &mut [usize]) {
+        debug_assert!(input.len() <= N_DIMS);
+        debug_assert!(out.len() <= N_DIMS);
+        for ((o, &i), &d) in out.iter_mut().zip(input).zip(self.shape.iter()) {
+            *o = (i + (d + 1) / 2) % d;    // inverse shift
+        }
     }
 
 }
