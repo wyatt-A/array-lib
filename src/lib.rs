@@ -79,7 +79,7 @@ mod tests {
 
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone,Copy,Debug, PartialEq, Eq)]
 pub struct ArrayDim {
     shape: [usize; N_DIMS],
     strides: [usize; N_DIMS],
