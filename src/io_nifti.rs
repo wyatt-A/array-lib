@@ -73,7 +73,7 @@ mod tests {
 /// nifti header
 pub fn read_nifti<T:ToPrimitive + NumCast + 'static + Pod>(file:impl AsRef<Path>) -> (Vec<T>, ArrayDim, NiftiHeader) {
 
-    let nii = nifti::ReaderOptions::new().read_file(file.as_ref()).expect("failed to read nifti file");
+    let nii = nifti::ReaderOptions::new().read_file(file.as_ref()).expect(&format!("failed to read nifti :{}",file.as_ref().display()));
     let nii_header = nii.header().clone();
     let volume = nii.into_volume();
 
@@ -114,7 +114,7 @@ pub fn read_nifti<T:ToPrimitive + NumCast + 'static + Pod>(file:impl AsRef<Path>
 /// nifti header
 pub fn read_nifti_complex<T:ToPrimitive + Zero + NumCast + 'static + Pod>(file:impl AsRef<Path>) -> (Vec<Complex<T>>, ArrayDim, NiftiHeader) {
 
-    let nii = nifti::ReaderOptions::new().read_file(file.as_ref()).expect("failed to read nifti file");
+    let nii = nifti::ReaderOptions::new().read_file(file.as_ref()).expect(&format!("failed to read nifti :{}",file.as_ref().display()));
     let nii_header = nii.header().clone();
     let volume = nii.into_volume();
 
