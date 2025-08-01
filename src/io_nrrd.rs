@@ -6,12 +6,12 @@ use nrrd_rs::header_defs::{Encoding, NRRDType};
 use num_traits::FromPrimitive;
 
 /// read data from a nrrd, either attached (.nrrd) or detached (.nhdr)
-pub fn read_nrrd_to_array<T>(file:impl AsRef<Path>) -> (NRRD, ArrayDim, Vec<T>)
+pub fn read_nrrd_to_array<T>(file:impl AsRef<Path>) -> (Vec<T>, ArrayDim, NRRD)
 where T:NRRDType + FromPrimitive
 {
     let (data,nrrd) = read_nrrd_to(file);
     let dims = ArrayDim::from_shape(nrrd.shape());
-    (nrrd, dims, data)
+    (data, dims, nrrd)
 }
 
 /// write a nrrd file from an array given a set of dimensions and an optional reference header.
