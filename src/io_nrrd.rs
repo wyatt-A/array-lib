@@ -7,7 +7,7 @@ use num_traits::FromPrimitive;
 pub use nrrd_rs::header_defs::Encoding;
 
 /// read data from a nrrd, either attached (.nrrd) or detached (.nhdr)
-pub fn read_nrrd_to_array<T>(file:impl AsRef<Path>) -> (Vec<T>, ArrayDim, NRRD)
+pub fn read_nrrd<T>(file:impl AsRef<Path>) -> (Vec<T>, ArrayDim, NRRD)
 where T:NRRDType + FromPrimitive
 {
     let (data,nrrd) = read_nrrd_to(file);
@@ -17,7 +17,7 @@ where T:NRRDType + FromPrimitive
 
 /// write a nrrd file from an array given a set of dimensions and an optional reference header.
 /// The dimensions of the reference header must match the dimensions given.
-pub fn write_nrrd_from_array<T>(file: impl AsRef<Path>, array:&[T], dims:ArrayDim, reference_header:Option<&NRRD>, attached:bool, encoding: Encoding)
+pub fn write_nrrd<T>(file: impl AsRef<Path>, array:&[T], dims:ArrayDim, reference_header:Option<&NRRD>, attached:bool, encoding: Encoding)
 where T:NRRDType
 {
     assert_eq!(dims.numel(), array.len(), "data buffer and array dims must be consistent");
