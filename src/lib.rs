@@ -6,6 +6,9 @@
 #[cfg(feature = "io-nifti")]
 pub mod io_nifti;
 
+#[cfg(feature = "io-nrrd")]
+pub mod io_nrrd;
+
 const N_DIMS:usize = 16;
 
 #[cfg(test)]
@@ -67,19 +70,18 @@ mod tests {
     }
 
     #[test]
-    fn t_fftshift() {
-        let dims = ArrayDim::from_shape(&[6,4,5]);
-        let coord = [0,0,0];
-        let mut out = [0,0,0];
-        dims.fft_shift_coords(&coord,&mut out);
-        let mut inv = [0,0,0];
-        dims.ifft_shift_coords(&out,&mut inv);
-        assert_eq!(inv,coord);
+    fn test_shape_ns() {
+        let dims = ArrayDim::from_shape(&[3,4,5,1,6]);
+        let dns = dims.shape_ns();
+        assert_eq!(dns,&[3,4,5,1,6]);
+        let dims = ArrayDim::from_shape(&[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+        let dns = dims.shape_ns();
+        assert_eq!(dns,&[1]);
     }
 
 }
 
-#[derive(Clone,Copy,Debug, PartialEq, Eq)]
+#[derive(Clone,Copy,Debug)]
 pub struct ArrayDim {
     shape: [usize; N_DIMS],
     strides: [usize; N_DIMS],
@@ -111,8 +113,20 @@ impl ArrayDim {
 
     }
 
+    /// return the shape with all singleton dimensions intact
     pub fn shape(&self) -> &[usize; N_DIMS] {
         &self.shape
+    }
+
+    /// return the shape with trailing singleton dimensions removed
+    pub fn shape_ns(&self) -> &[usize] {
+        if let Some(i) = self.shape.iter().rev().position(|&dim| dim != 1) {
+            let new_len = self.shape.len() - i;
+            &self.shape[..new_len]
+        } else {
+            // All dims are 1, return scalar shape (or empty, up to convention)
+            &[1]
+        }
     }
 
     pub fn size(&self, dim:usize) -> usize {
@@ -170,24 +184,6 @@ impl ArrayDim {
     /// allocates a vector of values the size of dims
     pub fn alloc<T:Sized + Clone>(&self,value:T) -> Vec<T> {
         vec![value;self.numel()]
-    }
-
-    #[inline]
-    pub fn fft_shift_coords(&self,input: &[usize], out: &mut [usize]) {
-        debug_assert!(input.len() <= N_DIMS);
-        debug_assert!(out.len() <= N_DIMS);
-        for ((o, &i), &d) in out.iter_mut().zip(input).zip(self.shape.iter()) {
-            *o = (i + d / 2) % d;          // forward shift
-        }
-    }
-
-    #[inline]
-    pub fn ifft_shift_coords(&self, input: &[usize], out: &mut [usize]) {
-        debug_assert!(input.len() <= N_DIMS);
-        debug_assert!(out.len() <= N_DIMS);
-        for ((o, &i), &d) in out.iter_mut().zip(input).zip(self.shape.iter()) {
-            *o = (i + (d + 1) / 2) % d;    // inverse shift
-        }
     }
 
 }
