@@ -2,8 +2,9 @@ use std::path::Path;
 use crate::ArrayDim;
 use nrrd_rs::{read_nrrd_to, NRRD};
 use nrrd_rs::write_nrrd;
-use nrrd_rs::header_defs::{Encoding, NRRDType};
+use nrrd_rs::header_defs::{NRRDType};
 use num_traits::FromPrimitive;
+pub use nrrd_rs::header_defs::Encoding;
 
 /// read data from a nrrd, either attached (.nrrd) or detached (.nhdr)
 pub fn read_nrrd_to_array<T>(file:impl AsRef<Path>) -> (Vec<T>, ArrayDim, NRRD)
