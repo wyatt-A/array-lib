@@ -25,7 +25,7 @@ mod tests {
 
 }
 
-pub fn read_nifti_to_array<T>(file:impl AsRef<Path>) -> (NiftiHeader,ArrayDim,Vec<T>)
+pub fn read_nifti_to_array<T>(file:impl AsRef<Path>) -> (Vec<T>,ArrayDim,NiftiHeader)
 where T:Sized + DataElement
 {
     let nii = nifti::ReaderOptions::new().read_file(file.as_ref()).expect("failed to read nifti file");
@@ -33,7 +33,7 @@ where T:Sized + DataElement
     let volume = nii.into_volume();
     let dims:Vec<_> = volume.dim().iter().map(|&dim| dim as usize).collect();
     let data:Vec<T> = volume.into_nifti_typed_data().expect("failed to retrieve typed nifti data");
-    (nii_header, ArrayDim::from_shape(&dims), data)
+    ( data, ArrayDim::from_shape(&dims), nii_header)
 }
 
 pub fn write_nifti_from_array<T>(file: impl AsRef<Path>, array:&[T], dims:ArrayDim)
