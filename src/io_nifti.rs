@@ -11,14 +11,14 @@ use crate::ArrayDim;
 mod tests {
     use num_complex::Complex32;
     use crate::ArrayDim;
-    use crate::io::{read_nifti_to_array, write_nifti_from_array};
+    use crate::io_nifti::{read_nifti_to_array, write_nifti_from_array};
 
     #[test]
     fn test_io_nifti() {
         let dims = ArrayDim::from_shape(&[10,5,4,3,3]);
         let x = dims.alloc(Complex32::ONE);
         write_nifti_from_array("test_complex",&x,dims);
-        let (..,dims,data) = read_nifti_to_array::<Complex32>("test_complex.nii");
+        let (data,dims,..) = read_nifti_to_array::<Complex32>("test_complex.nii");
         std::fs::remove_file("test_complex.nii").unwrap();
         assert_eq!(x,data);
     }
@@ -36,7 +36,7 @@ where T:Sized + DataElement
     ( data, ArrayDim::from_shape(&dims), nii_header)
 }
 
-pub fn write_nifti_from_array<T>(file: impl AsRef<Path>, array:&[T], dims:ArrayDim)
+pub fn write_nifti_from_array<T>(file: impl AsRef<Path>, array:&[T], dims:ArrayDim, ref_header:Option<&NiftiHeader>)
 where T:Sized + DataElement + Pod
 {
     assert_eq!(dims.numel(), array.len(), "data buffer and array dims must be consistent");
@@ -48,5 +48,12 @@ where T:Sized + DataElement + Pod
         ndarray::Array::from_shape_vec([dims.size(0),dims.size(1),dims.size(2)].as_slice().f(), array.to_vec()).unwrap()
     };
     let writer = nifti::writer::WriterOptions::new(file.as_ref().with_extension("nii"));
+
+    let writer = if let Some(header) = ref_header {
+        writer.reference_header(header)
+    } else {
+        writer
+    };
+
     writer.write_nifti(&arr).expect("failed to write nifti");
 }
