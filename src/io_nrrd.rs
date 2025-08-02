@@ -1,6 +1,7 @@
 use std::path::Path;
 use crate::ArrayDim;
-use nrrd_rs::{read_nrrd_to, NRRD};
+pub use nrrd_rs::NRRD;
+use nrrd_rs::read_nrrd_to;
 use nrrd_rs::header_defs::{NRRDType};
 use num_traits::FromPrimitive;
 pub use nrrd_rs::header_defs::Encoding;

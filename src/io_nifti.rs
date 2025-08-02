@@ -1,7 +1,8 @@
 use std::path::Path;
 use bytemuck::Pod;
 use nifti;
-use nifti::{DataElement, InMemNiftiVolume, NiftiHeader, NiftiObject, NiftiType, NiftiVolume};
+pub use nifti::NiftiHeader;
+use nifti::{DataElement, InMemNiftiVolume, NiftiObject, NiftiType, NiftiVolume};
 use ndarray;
 use ndarray::ShapeBuilder;
 use num_complex::Complex;
