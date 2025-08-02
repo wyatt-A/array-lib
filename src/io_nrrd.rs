@@ -1,7 +1,6 @@
 use std::path::Path;
 use crate::ArrayDim;
 use nrrd_rs::{read_nrrd_to, NRRD};
-use nrrd_rs::write_nrrd;
 use nrrd_rs::header_defs::{NRRDType};
 use num_traits::FromPrimitive;
 pub use nrrd_rs::header_defs::Encoding;
@@ -23,9 +22,9 @@ where T:NRRDType
     assert_eq!(dims.numel(), array.len(), "data buffer and array dims must be consistent");
     if let Some(ref_header) = reference_header {
         assert_eq!(ref_header.shape(),dims.shape_ns(),"reference nhdr must have the same dimensionality as the array");
-        write_nrrd(file, ref_header, array, attached, encoding);
+        nrrd_rs::write_nrrd(file, ref_header, array, attached, encoding);
     }else {
         let h = NRRD::new_from_dims::<T>(dims.shape_ns());
-        write_nrrd(file, &h, array, attached, encoding);
+        nrrd_rs::write_nrrd(file, &h, array, attached, encoding);
     };
 }
