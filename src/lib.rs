@@ -9,6 +9,9 @@ pub mod io_nifti;
 #[cfg(feature = "io-nrrd")]
 pub mod io_nrrd;
 
+#[cfg(feature = "io-nrrd")]
+pub use nrrd_rs;
+
 const N_DIMS:usize = 16;
 
 #[cfg(test)]
