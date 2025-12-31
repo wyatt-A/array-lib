@@ -12,6 +12,20 @@ pub mod io_nrrd;
 #[cfg(feature = "io-nrrd")]
 pub use nrrd_rs;
 
+#[cfg(feature = "io-mrd")]
+pub mod io_mrd;
+
+#[cfg(feature = "io-mrd")]
+pub use mrd_rs;
+
+#[cfg(feature = "io-cfl")]
+pub mod io_cfl;
+
+#[cfg(feature = "io-cfl")]
+pub use cfl;
+
+
+
 const N_DIMS:usize = 16;
 
 #[cfg(test)]
