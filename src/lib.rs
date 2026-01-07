@@ -269,7 +269,7 @@ impl ArrayDim {
             *o = (i + (d + 1) / 2) % d;    // inverse shift
         }
     }
-
+    
 }
 
 impl From<[usize;16]> for ArrayDim {
