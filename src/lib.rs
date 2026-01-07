@@ -23,8 +23,9 @@ pub mod io_cfl;
 
 #[cfg(feature = "io-cfl")]
 pub use cfl;
+use num_complex::Complex32;
 
-
+use rayon::prelude::*;
 
 const N_DIMS:usize = 16;
 
@@ -140,6 +141,41 @@ impl ArrayDim {
         }
 
     }
+
+    /// finds the index of the largest element based on the squared norm
+    pub fn argmax_cf32(&self, x:&[Complex32]) -> Option<[usize;N_DIMS]> {
+        x.par_iter().enumerate()
+            .map(|(i, v)| (i, v.norm_sqr()))
+            .reduce_with(|a, b| if a.1 >= b.1 { a } else { b })
+            .map(|(i, _)| i)
+            .and_then(|addr| Some( self.calc_idx(addr) ) )
+    }
+
+    /// finds the index of the smallest element based on the squared norm
+    pub fn argmin_cf32(&self, x:&[Complex32]) -> Option<[usize;N_DIMS]> {
+        x.par_iter().enumerate()
+            .map(|(i, v)| (i, v.norm_sqr()))
+            .reduce_with(|a, b| if a.1 < b.1 { a } else { b })
+            .map(|(i, _)| i)
+            .and_then(|addr| Some( self.calc_idx(addr) ) )
+    }
+
+    /// finds the index of the largest value
+    pub fn argmax_f32(&self,x:&[f32]) -> Option<[usize;N_DIMS]> {
+        x.par_iter().enumerate()
+            .reduce_with(|a, b| if a.1 >= b.1 { a } else { b })
+            .map(|(i, _)| i)
+            .and_then(|addr| Some( self.calc_idx(addr) ) )
+    }
+
+    /// finds this index of the smallest value
+    pub fn argmin_f32(&self,x:&[f32]) -> Option<[usize;N_DIMS]> {
+        x.par_iter().enumerate()
+            .reduce_with(|a, b| if a.1 < b.1 { a } else { b })
+            .map(|(i, _)| i)
+            .and_then(|addr| Some( self.calc_idx(addr) ) )
+    }
+
 
     /// return the shape with all singleton dimensions intact
     pub fn shape(&self) -> &[usize; N_DIMS] {

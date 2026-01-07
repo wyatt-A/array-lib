@@ -13,6 +13,7 @@ cfl = { git = "ssh://git@github.com/wyatt-A/cfl", optional = true }
 num-complex = "0.4.6"
 num-traits = "0.2.19"
 clap = { version = "4.5.53", features = ["derive"] }
+rayon = "1.11.0"
 
 [features]
 io-nifti = ["nifti","ndarray","bytemuck"]
