@@ -9,6 +9,7 @@ pub mod io_nifti;
 #[cfg(feature = "io-nrrd")]
 pub mod io_nrrd;
 
+use std::ops::Rem;
 #[cfg(feature = "io-nrrd")]
 pub use nrrd_rs;
 
@@ -23,7 +24,7 @@ pub mod io_cfl;
 
 #[cfg(feature = "io-cfl")]
 pub use cfl;
-use num_complex::Complex32;
+use num_complex::{Complex32, ComplexFloat};
 
 use rayon::prelude::*;
 
@@ -80,11 +81,26 @@ mod tests {
     }
 
     #[test]
-    fn test3() {
+    fn test_calc_addr() {
         let dims = ArrayDim::from_shape(&[3,4]);
         let idx = dims.calc_idx(3);
         let addr = dims.calc_addr(&idx);
         assert_eq!(addr,3);
+    }
+
+    #[test]
+    fn test_calc_idx_signed() {
+        let dims = ArrayDim::from_shape(&[3,4]);
+        let idx = dims.calc_idx_signed(3);
+        assert_eq!(idx,[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+    }
+
+    #[test]
+    fn test_calc_addr_signed() {
+        let dims = ArrayDim::from_shape(&[3,4]);
+        // this should be the last element in the array (address 11)
+        let addr = dims.calc_addr_signed(&[-1,-1]);
+        assert_eq!(addr,11);
     }
 
     #[test]
@@ -106,6 +122,16 @@ mod tests {
         let mut inv = [0,0,0];
         dims.ifft_shift_coords(&out,&mut inv);
         assert_eq!(inv,coord);
+    }
+
+    #[test]
+    fn test_arg_min_max() {
+        let x = vec![4.,2.,3.,6.,5.,1.];
+        let dims = ArrayDim::from_shape(&[2,3]);
+        let idx = dims.argmin(&x).unwrap();
+        assert_eq!(idx,[1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        let idx = dims.argmax(&x).unwrap();
+        assert_eq!(idx,[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     }
 
 }
@@ -176,6 +202,80 @@ impl ArrayDim {
             .and_then(|addr| Some( self.calc_idx(addr) ) )
     }
 
+    /// returns the element index with the lowest energy in the array
+    pub fn argmin_norm_sqr<T>(
+        &self,
+        x: &[T],
+    ) -> Option<[usize; N_DIMS]>
+    where
+        T: NormSqr + Send + Sync,
+    {
+        x.par_iter()
+            .enumerate()
+            .map(|(i, v)| (i, v.norm_sqr()))
+            .reduce_with(|a, b| if a.1 < b.1 { a } else { b })
+            .map(|(i, _)| self.calc_idx(i))
+    }
+
+    /// returns the element index with the maximum energy in the array
+    pub fn argmax_norm_sqr<T>(
+        &self,
+        x: &[T],
+    ) -> Option<[usize; N_DIMS]>
+    where
+        T: NormSqr + Send + Sync,
+    {
+        x.par_iter()
+            .enumerate()
+            .map(|(i, v)| (i, v.norm_sqr()))
+            .reduce_with(|a, b| if a.1 >= b.1 { a } else { b })
+            .map(|(i, _)| self.calc_idx(i))
+    }
+
+    /// returns the index of the smallest element in the array
+    pub fn argmin<T>(
+        &self,
+        x: &[T],
+    ) -> Option<[usize; N_DIMS]>
+    where T: Send + Sync + PartialOrd
+    {
+        x.par_iter()
+            .enumerate()
+            .reduce_with(|a, b| if a.1 < b.1 { a } else { b })
+            .map(|(i, _)| self.calc_idx(i))
+    }
+
+    /// returns the index of the largest element in the array
+    pub fn argmax<T>(
+        &self,
+        x: &[T],
+    ) -> Option<[usize; N_DIMS]>
+    where T: Send + Sync + PartialOrd
+    {
+        x.par_iter()
+            .enumerate()
+            .reduce_with(|a, b| if a.1 >= b.1 { a } else { b })
+            .map(|(i, _)| self.calc_idx(i))
+    }
+
+    /// performs a circular shift on src elements, writing into dst
+    pub fn circshift<T:Sized + Copy + Send + Sync>(&self,shift:&[isize],src:&[T],dst: &mut [T]) {
+        assert_eq!(src.len(), self.numel(), "src must be the same size as array");
+        assert_eq!(dst.len(), self.numel(), "dst must be the same size as array");
+        let shape = self.shape();
+        dst.par_iter_mut().enumerate().for_each(|(addr,x)|{
+            // get index of destination
+            let mut idx = self.calc_idx_signed(addr);
+            // perform inverse shift to calculate source index (can be negative or too large)
+            idx.iter_mut().zip(shift.iter().zip(shape.iter())).for_each(|(i,(s,d))|{
+                *i -= *s;
+            });
+            // calculate source address and read into dest
+            let src_addr = self.calc_addr_signed(&idx);
+            *x = src[src_addr];
+        });
+    }
+
 
     /// return the shape with all singleton dimensions intact
     pub fn shape(&self) -> &[usize; N_DIMS] {
@@ -232,6 +332,19 @@ impl ArrayDim {
     }
 
     #[inline]
+    /// calculate the element address from a periodic (wrapping) index. Indices can be negative and
+    /// larger than the axis dimension
+    pub fn calc_addr_signed(&self, idx: &[isize]) -> usize {
+        let mut offset = 0;
+        let shape = self.shape();
+        for (i,(stride,dim)) in idx.iter().zip(self.strides.iter().zip(shape.iter())) {
+            let i = i.rem_euclid(*dim as isize) as usize;
+            offset += i * stride;
+        }
+        offset
+    }
+
+    #[inline]
     /// calculate the element index (subscript) from the address
     pub fn calc_idx(&self,addr:usize) -> [usize;16] {
         let mut addr = addr;
@@ -241,6 +354,20 @@ impl ArrayDim {
         for k in 0..N_DIMS {
             idx[k] = addr % self.shape[k];
             addr /= self.shape[k];
+        }
+        idx
+    }
+
+    #[inline]
+    /// calculate the element index (subscript) from the address
+    pub fn calc_idx_signed(&self,addr:usize) -> [isize;16] {
+        let mut addr = addr as isize;
+        let total: isize = self.shape.iter().product::<usize>() as isize;
+        debug_assert!(addr < total, "offset {} exceeds total number of elements {}", addr, total);
+        let mut idx = [0isize; N_DIMS];
+        for k in 0..N_DIMS {
+            idx[k] = addr % self.shape[k] as isize;
+            addr /= self.shape[k] as isize;
         }
         idx
     }
@@ -279,5 +406,18 @@ impl From<[usize;16]> for ArrayDim {
             arr_dim = arr_dim.with_dim(ax,dim);
         }
         arr_dim
+    }
+}
+
+pub trait NormSqr {
+    type Output: Send + Sync + Copy + PartialOrd;
+    fn norm_sqr(&self) -> Self::Output;
+}
+
+// Complex32 example (from num_complex)
+impl NormSqr for Complex32 {
+    type Output = f32;
+    fn norm_sqr(&self) -> Self::Output {
+        self.norm_sqr()
     }
 }
