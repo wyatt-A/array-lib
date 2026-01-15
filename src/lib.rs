@@ -276,6 +276,33 @@ impl ArrayDim {
         });
     }
 
+    /// performs an fft shift on an n-d array. The forward flag specifies the forward shift, shifting
+    /// the DC sample to the center of the array. If forward is false, the center DC sample is
+    /// shifted to the front of the array
+    pub fn fftshift<T:Sized + Copy + Send + Sync>(&self,src:&[T],dst:&mut [T], forward:bool) {
+        assert_eq!(src.len(), self.numel(), "src must be the same size as array");
+        assert_eq!(dst.len(), self.numel(), "dst must be the same size as array");
+
+        if forward {
+            dst.par_iter_mut().enumerate().for_each(|(dst_addr,x)|{
+                let dst_idx = self.calc_idx(dst_addr);
+                let mut src_idx = [0;N_DIMS];
+                // inverse shift because we need to find where the source was
+                self.ifft_shift_coords(&dst_idx, &mut src_idx);
+                let src_addr = self.calc_addr(&src_idx);
+                *x = src[src_addr];
+            });
+        }else {
+            dst.par_iter_mut().enumerate().for_each(|(dst_addr,x)|{
+                let dst_idx = self.calc_idx(dst_addr);
+                let mut src_idx = [0;N_DIMS];
+                // forward shift because we need to find where the source was
+                self.fft_shift_coords(&dst_idx, &mut src_idx);
+                let src_addr = self.calc_addr(&src_idx);
+                *x = src[src_addr];
+            });
+        }
+    }
 
     /// return the shape with all singleton dimensions intact
     pub fn shape(&self) -> &[usize; N_DIMS] {
