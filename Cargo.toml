@@ -10,6 +10,7 @@ nifti = { version = "0.17.0", optional = true }
 nrrd-rs = { git = "https://git@github.com/wyatt-A/nrrd-rs", optional = true }
 mrd-rs = { git = "ssh://git@github.com/wyatt-A/mrd-rs", optional = true }
 cfl = { git = "ssh://git@github.com/wyatt-A/cfl", optional = true }
+bruker-jcamp-rs = {git = "ssh://git@github.com/wyatt-A/bruker-jcamp-rs", optional = true}
 num-complex = "0.4.6"
 num-traits = "0.2.19"
 clap = { version = "4.5.53", features = ["derive"] }
@@ -20,6 +21,7 @@ io-nifti = ["nifti","ndarray","bytemuck"]
 io-nrrd = ["nrrd-rs"]
 io-mrd = ["mrd-rs"]
 io-cfl = ["cfl"]
+io-bruker = ["bruker-jcamp-rs","bytemuck"]
 
 [dev-dependencies]
 num-complex = "0.4.6"
