@@ -150,6 +150,10 @@ impl ArrayDim {
             strides: [1;N_DIMS],
         }
     }
+    
+    pub fn strides(&self) -> &[usize; N_DIMS] {
+        &self.strides
+    }
 
     pub fn from_shape(shape: &[usize]) -> ArrayDim {
 

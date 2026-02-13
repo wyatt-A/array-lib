@@ -29,3 +29,11 @@ num-complex = "0.4.6"
 [[bin]]
 name = "mrd-to-cfl"
 required-features = ["io-cfl","io-mrd"]
+
+[[bin]]
+name = "bruker-fid-to-cfl"
+required-features = ["io-cfl","io-bruker"]
+
+[[bin]]
+name = "bruker-traj-to-cfl"
+required-features = ["io-cfl"]
