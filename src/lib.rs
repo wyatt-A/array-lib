@@ -324,6 +324,11 @@ impl ArrayDim {
         }
     }
 
+    /// returns the shape of the array with all singleton dimensions removed
+    pub fn shape_squeeze(&self) -> Vec<usize> {
+        self.shape.iter().filter_map(|dim| if *dim != 1 { Some(*dim) } else { None }).collect()
+    }
+
     pub fn size(&self, dim:usize) -> usize {
         assert!(dim < N_DIMS);
         self.shape[dim]
