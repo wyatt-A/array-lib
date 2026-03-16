@@ -9,6 +9,7 @@ pub mod io_nifti;
 #[cfg(feature = "io-nrrd")]
 pub mod io_nrrd;
 
+use std::fmt::Display;
 use std::ops::Rem;
 #[cfg(feature = "io-nrrd")]
 pub use nrrd_rs;
@@ -140,6 +141,13 @@ mod tests {
 pub struct ArrayDim {
     shape: [usize; N_DIMS],
     strides: [usize; N_DIMS],
+}
+
+impl Display for ArrayDim {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let shape = self.shape_squeeze();
+        writeln!(f, "shape: {:?}", shape)
+    }
 }
 
 impl ArrayDim {
