@@ -146,7 +146,7 @@ pub struct ArrayDim {
 impl Display for ArrayDim {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let shape = self.shape_squeeze();
-        writeln!(f, "shape: {:?}", shape)
+        writeln!(f, "{:?}", shape)
     }
 }
 
