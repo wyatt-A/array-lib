@@ -44,12 +44,12 @@ pub fn read_bruker_fid(fid_file:impl AsRef<Path>, n_read:usize, n_coils:usize) -
     // allocate complex data buffer to read bytes into
     let mut array_data = vec![0f32; n_points * 2];
 
-    bytes.chunks_exact(window_size).for_each(|window| {
-
-        // pull bytes from window, cast to i32, then cast to f32
-        window[0..]
-
-    });
+    // bytes.chunks_exact(window_size).for_each(|window| {
+    //
+    //     // pull bytes from window, cast to i32, then cast to f32
+    //     window[0..]
+    //
+    // });
 
     // do final bytemuck cast to complex32 to return
 

@@ -28,7 +28,10 @@ mod io_bruker;
 
 #[cfg(feature = "io-cfl")]
 pub use cfl;
-use num_complex::{Complex32, ComplexFloat};
+
+pub use num_complex;
+
+use num_complex::Complex32;
 
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};

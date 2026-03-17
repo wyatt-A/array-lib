@@ -11,7 +11,7 @@ nrrd-rs = { git = "https://git@github.com/wyatt-A/nrrd-rs", optional = true }
 mrd-rs = { git = "ssh://git@github.com/wyatt-A/mrd-rs", optional = true }
 bruker-jcamp-rs = {git = "ssh://git@github.com/wyatt-A/bruker-jcamp-rs", optional = true}
 cfl = { git = "ssh://git@github.com/wyatt-A/cfl", optional = true }
-num-complex = "0.4.6"
+num-complex = { version = "0.4.6", features = ["serde"] }
 num-traits = "0.2.19"
 clap = { version = "4.5.53", features = ["derive"] }
 rayon = "1.11.0"
@@ -23,9 +23,6 @@ io-nrrd = ["nrrd-rs"]
 io-mrd = ["mrd-rs"]
 io-cfl = ["cfl"]
 io-bruker = ["bytemuck","bruker-jcamp-rs"]
-
-[dev-dependencies]
-num-complex = "0.4.6"
 
 [[bin]]
 name = "mrd-to-cfl"
