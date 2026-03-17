@@ -23,6 +23,9 @@ pub use mrd_rs;
 #[cfg(feature = "io-cfl")]
 pub mod io_cfl;
 
+#[cfg(feature = "io-bruker")]
+mod io_bruker;
+
 #[cfg(feature = "io-cfl")]
 pub use cfl;
 use num_complex::{Complex32, ComplexFloat};
@@ -135,6 +138,39 @@ mod tests {
         assert_eq!(idx,[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     }
 
+    #[test]
+    fn test_dim_label() {
+
+        let d = ArrayDim::new().with_dim_from_label(DimLabel::COIL,4).with_dim_from_label(DimLabel::READ,256);
+
+        assert_eq!(d.shape_ns(),[256,1,1,4]);
+
+        println!("{:?}",d.strides_by_label(DimLabel::COIL));
+
+
+    }
+
+}
+
+/// Dimension definitions from BART. This encodes a 'meaning' for each array axis
+#[derive(Clone,Copy,Debug)]
+pub enum DimLabel {
+    READ,
+    PHS1,
+    PHS2,
+    COIL,
+    MAPS,
+    TE,
+    COEFF,
+    COEFF2,
+    ITER,
+    CSHIFT,
+    TIME,
+    TIME2,
+    LEVEL,
+    SLICE,
+    AVG,
+    BATCH,
 }
 
 #[derive(Clone,Copy,Debug)]
@@ -161,6 +197,24 @@ impl ArrayDim {
     
     pub fn strides(&self) -> &[usize; N_DIMS] {
         &self.strides
+    }
+
+    /// construct an array from dimension labels
+    pub fn with_dim_from_label(self, dim_label: DimLabel, size:usize) -> ArrayDim {
+        let axis = dim_label as usize;
+        self.with_dim(axis,size)
+    }
+
+    /// returns the size of an axis from a dim label
+    pub fn dim_by_label(&self, dim_label: DimLabel) -> usize {
+        let axis = dim_label as usize;
+        self.shape[axis]
+    }
+
+    /// returns the stride of the axis by dim label
+    pub fn strides_by_label(&self, dim_label: DimLabel) -> usize {
+        let axis = dim_label as usize;
+        self.strides[axis]
     }
 
     pub fn from_shape(shape: &[usize]) -> ArrayDim {
