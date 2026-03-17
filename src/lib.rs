@@ -10,7 +10,7 @@ pub mod io_nifti;
 pub mod io_nrrd;
 
 use std::fmt::Display;
-use std::ops::Rem;
+
 #[cfg(feature = "io-nrrd")]
 pub use nrrd_rs;
 
@@ -31,6 +31,7 @@ pub use cfl;
 use num_complex::{Complex32, ComplexFloat};
 
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 const N_DIMS:usize = 16;
 
@@ -153,7 +154,7 @@ mod tests {
 }
 
 /// Dimension definitions from BART. This encodes a 'meaning' for each array axis
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone,Copy,Debug, Serialize, Deserialize)]
 pub enum DimLabel {
     READ,
     PHS1,
@@ -173,7 +174,7 @@ pub enum DimLabel {
     BATCH,
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone,Copy,Debug, Serialize, Deserialize)]
 pub struct ArrayDim {
     shape: [usize; N_DIMS],
     strides: [usize; N_DIMS],

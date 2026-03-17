@@ -15,6 +15,7 @@ num-complex = "0.4.6"
 num-traits = "0.2.19"
 clap = { version = "4.5.53", features = ["derive"] }
 rayon = "1.11.0"
+serde = { version = "1.0.228", features = ["derive"] }
 
 [features]
 io-nifti = ["nifti","ndarray","bytemuck"]
