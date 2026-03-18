@@ -253,7 +253,7 @@ impl From<DimSize> for DimLabel {
 
 impl From<&DimSize> for DimLabel {
     fn from(size: &DimSize) -> Self {
-        *size.into()
+        (*size).into()
     }
 }
 
