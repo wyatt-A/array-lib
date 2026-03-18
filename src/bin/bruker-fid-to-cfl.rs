@@ -32,6 +32,12 @@ enum FidToCflError {
     UnexpectedDataType(String),
 }
 
+impl From<PvError> for FidToCflError {
+    fn from(err: PvError) -> Self {
+        FidToCflError::PV(err)
+    }
+}
+
 #[derive(Parser)]
 struct Args {
     /// path to Bruker fid file to parse
@@ -57,10 +63,7 @@ fn main() -> Result<(), FidToCflError> {
 
     let oversampling_factor = args.f_oversample.unwrap_or(1);
 
-    let f = File::open(args.acqp_file).map_err(IO)?;
-    let acqp = parse_paravision_params(
-        BufReader::new(f),
-    ).map_err(PV)?;
+    let acqp = parse_paravision_params(&args.acqp_file)?;
 
     let acq_size = acqp.params.get(ACQ_SIZE).ok_or_else(|| FieldNotFound(String::from(ACQ_SIZE)))?;
     let receivers = acqp.params.get(RECEIVERS).ok_or_else(|| FieldNotFound(String::from(RECEIVERS)))?;

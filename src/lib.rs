@@ -25,6 +25,7 @@ pub mod io_cfl;
 
 #[cfg(feature = "io-bruker")]
 mod io_bruker;
+mod io_agilent;
 
 #[cfg(feature = "io-cfl")]
 pub use cfl;
