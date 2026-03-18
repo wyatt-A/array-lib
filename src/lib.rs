@@ -195,6 +195,8 @@ pub enum DimSize {
 }
 
 impl DimSize {
+
+    /// returns the size of the dimension
     pub fn size(&self) -> usize {
         match self {
             DimSize::READ(s) => *s,
@@ -215,6 +217,13 @@ impl DimSize {
             DimSize::BATCH(s) => *s,
         }
     }
+
+    /// returns the dimension index of the label (0-15)
+    pub fn dim(&self) -> usize {
+        let label:DimLabel = self.into();
+        label as usize
+    }
+
 }
 
 impl From<DimSize> for DimLabel {
