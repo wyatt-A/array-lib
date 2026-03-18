@@ -24,7 +24,7 @@ pub use mrd_rs;
 pub mod io_cfl;
 
 #[cfg(feature = "io-bruker")]
-mod io_bruker;
+pub mod io_bruker;
 mod io_agilent;
 
 #[cfg(feature = "io-cfl")]
