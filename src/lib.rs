@@ -194,6 +194,29 @@ pub enum DimSize {
     BATCH(usize),
 }
 
+impl DimSize {
+    pub fn size(&self) -> usize {
+        match self {
+            DimSize::READ(s) => *s,
+            DimSize::PHS1(s) => *s,
+            DimSize::PHS2(s) => *s,
+            DimSize::COIL(s) => *s,
+            DimSize::MAPS(s) => *s,
+            DimSize::TE(s) => *s,
+            DimSize::COEFF(s) => *s,
+            DimSize::COEFF2(s) => *s,
+            DimSize::ITER(s) => *s,
+            DimSize::CSHIFT(s) => *s,
+            DimSize::TIME(s) => *s,
+            DimSize::TIME2(s) => *s,
+            DimSize::LEVEL(s) => *s,
+            DimSize::SLICE(s) => *s,
+            DimSize::AVG(s) => *s,
+            DimSize::BATCH(s) => *s,
+        }
+    }
+}
+
 impl From<DimSize> for DimLabel {
     fn from(size: DimSize) -> Self {
         match size {
@@ -247,9 +270,10 @@ impl ArrayDim {
     }
 
     /// construct an array from dimension labels
-    pub fn with_dim_from_label(self, dim_label: DimLabel, size:usize) -> ArrayDim {
-        let axis = dim_label as usize;
-        self.with_dim(axis,size)
+    pub fn with_dim_from_label(self, dim_size: DimSize) -> ArrayDim {
+        let label:DimLabel = dim_size.into();
+        let axis = ;
+        self.with_dim(label as usize,size)
     }
 
     /// returns the size of an axis from a dim label
