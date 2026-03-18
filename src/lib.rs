@@ -145,14 +145,9 @@ mod tests {
 
     #[test]
     fn test_dim_label() {
-
         let d = ArrayDim::new().with_dim_from_label(DimLabel::COIL,4).with_dim_from_label(DimLabel::READ,256);
-
         assert_eq!(d.shape_ns(),[256,1,1,4]);
-
         println!("{:?}",d.strides_by_label(DimLabel::COIL));
-
-
     }
 
 }
@@ -177,6 +172,53 @@ pub enum DimLabel {
     AVG,
     BATCH,
 }
+
+/// Dim label with an added size parameter
+#[derive(Clone,Copy,Debug, Serialize, Deserialize)]
+pub enum DimSize {
+    READ(usize),
+    PHS1(usize),
+    PHS2(usize),
+    COIL(usize),
+    MAPS(usize),
+    TE(usize),
+    COEFF(usize),
+    COEFF2(usize),
+    ITER(usize),
+    CSHIFT(usize),
+    TIME(usize),
+    TIME2(usize),
+    LEVEL(usize),
+    SLICE(usize),
+    AVG(usize),
+    BATCH(usize),
+}
+
+impl From<DimSize> for DimLabel {
+    fn from(size: DimSize) -> Self {
+        match size {
+            DimSize::READ(_) => DimLabel::READ,
+            DimSize::PHS1(_) => DimLabel::PHS1,
+            DimSize::PHS2(_) => DimLabel::PHS2,
+            DimSize::COIL(_) => DimLabel::COIL,
+            DimSize::MAPS(_) => DimLabel::MAPS,
+            DimSize::TE(_) => DimLabel::TE,
+            DimSize::COEFF(_) => DimLabel::COEFF,
+            DimSize::COEFF2(_) => DimLabel::COEFF2,
+            DimSize::ITER(_) => DimLabel::ITER,
+            DimSize::CSHIFT(_) => DimLabel::CSHIFT,
+            DimSize::TIME(_) => DimLabel::TIME,
+            DimSize::TIME2(_) => DimLabel::TIME2,
+            DimSize::LEVEL(_) => DimLabel::LEVEL,
+            DimSize::SLICE(_) => DimLabel::SLICE,
+            DimSize::AVG(_) => DimLabel::AVG,
+            DimSize::BATCH(_) => DimLabel::BATCH,
+        }
+    }
+}
+
+
+
 
 #[derive(Clone,Copy,Debug, Serialize, Deserialize)]
 pub struct ArrayDim {
