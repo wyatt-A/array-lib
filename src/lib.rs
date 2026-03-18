@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn test_dim_label() {
-        let d = ArrayDim::new().with_dim_from_label(DimLabel::COIL,4).with_dim_from_label(DimLabel::READ,256);
+        let d = ArrayDim::new().with_dim_from_label(DimSize::COIL(4)).with_dim_from_label(DimSize::READ(256));
         assert_eq!(d.shape_ns(),[256,1,1,4]);
         println!("{:?}",d.strides_by_label(DimLabel::COIL));
     }
@@ -272,8 +272,7 @@ impl ArrayDim {
     /// construct an array from dimension labels
     pub fn with_dim_from_label(self, dim_size: DimSize) -> ArrayDim {
         let label:DimLabel = dim_size.into();
-        let axis = ;
-        self.with_dim(label as usize,size)
+        self.with_dim(label as usize,dim_size.size())
     }
 
     /// returns the size of an axis from a dim label
