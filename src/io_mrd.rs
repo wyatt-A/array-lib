@@ -16,8 +16,13 @@ pub fn read_mrd_header(file: impl AsRef<Path>) -> MRD {
     MRD::open(file)
 }
 
-/// read partial MRD contents to a buffer with some offset
-pub fn read_mrd_buffer(file: impl AsRef<Path>, offset:usize, buffer:&mut [Complex32]) -> std::io::Result<()> {
+/// read partial MRD contents to a buffer with some offset from a file name
+pub fn read_mrd_buffer_f(file: impl AsRef<Path>, offset:usize, buffer:&mut [Complex32]) -> std::io::Result<()> {
     let mrd = MRD::open(file);
+    mrd.fill_buffer(buffer,offset)
+}
+
+/// read partial MRD contents to a buffer with some offset from an opened MRD
+pub fn read_mrd_buffer(mrd:&MRD, offset:usize, buffer:&mut [Complex32]) -> std::io::Result<()> {
     mrd.fill_buffer(buffer,offset)
 }
