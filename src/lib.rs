@@ -136,22 +136,6 @@ mod tests {
     }
 
     #[test]
-    fn test_fftshift() {
-
-        let dims = ArrayDim::from_shape(&[6,1]);
-        for i in 0..dims.numel() {
-
-            let [x,..] = dims.calc_idx(i);
-            let mut shifted = [0usize];
-            dims.fft_shift_coords(&[x],&mut shifted);
-            println!("{} -> {}",x,shifted[0]);
-
-        }
-
-
-    }
-
-    #[test]
     fn test_arg_min_max() {
         let x = vec![4.,2.,3.,6.,5.,1.];
         let dims = ArrayDim::from_shape(&[2,3]);
@@ -170,15 +154,12 @@ mod tests {
 
     #[test]
     fn test_fft_shift_coord_s() {
-        let d = ArrayDim::from_shape(&[6,1]);
+        let d = ArrayDim::from_shape(&[7,1]);
         let mut a = d.alloc(0f32);
         a.iter_mut().enumerate().for_each(|(i,v)|{
             let [x,..] = d.calc_idx(i);
             let mut signed = [0isize];
-            let mut shifted = [0usize];
-            d.fft_shift_coords(&[x],&mut shifted);
-            d.signed_coords(&shifted,&mut signed);
-            //d.signed_coords(&[x],&mut signed);
+            d.signed_coords(&[x],&mut signed);
             println!("{} -> {}",x,signed[0]);
         });
     }
