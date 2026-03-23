@@ -136,6 +136,22 @@ mod tests {
     }
 
     #[test]
+    fn test_fftshift() {
+
+        let dims = ArrayDim::from_shape(&[6,1]);
+        for i in 0..dims.numel() {
+
+            let [x,..] = dims.calc_idx(i);
+            let mut shifted = [0usize];
+            dims.fft_shift_coords(&[x],&mut shifted);
+            println!("{} -> {}",x,shifted[0]);
+
+        }
+
+
+    }
+
+    #[test]
     fn test_arg_min_max() {
         let x = vec![4.,2.,3.,6.,5.,1.];
         let dims = ArrayDim::from_shape(&[2,3]);
@@ -150,6 +166,21 @@ mod tests {
         let d = ArrayDim::new().with_dim_from_label(DimSize::COIL(4)).with_dim_from_label(DimSize::READ(256));
         assert_eq!(d.shape_ns(),[256,1,1,4]);
         println!("{:?}",d.strides_by_label(DimLabel::COIL));
+    }
+
+    #[test]
+    fn test_fft_shift_coord_s() {
+        let d = ArrayDim::from_shape(&[6,1]);
+        let mut a = d.alloc(0f32);
+        a.iter_mut().enumerate().for_each(|(i,v)|{
+            let [x,..] = d.calc_idx(i);
+            let mut signed = [0isize];
+            let mut shifted = [0usize];
+            d.fft_shift_coords(&[x],&mut shifted);
+            d.signed_coords(&shifted,&mut signed);
+            //d.signed_coords(&[x],&mut signed);
+            println!("{} -> {}",x,signed[0]);
+        });
     }
 
 }
@@ -572,6 +603,7 @@ impl ArrayDim {
         }
     }
 
+
     #[inline]
     /// perform an inverse fft shift of the input coordinates
     pub fn ifft_shift_coords(&self, input: &[usize], out: &mut [usize]) {
@@ -581,7 +613,23 @@ impl ArrayDim {
             *o = (i + (d + 1) / 2) % d;    // inverse shift
         }
     }
-    
+
+    #[inline]
+    /// calculates the signed coordinates from unsigned coordinates
+    pub fn signed_coords(&self, input: &[usize], out: &mut [isize]) {
+        debug_assert!(input.len() <= N_DIMS);
+        debug_assert!(out.len() <= N_DIMS);
+        for ((o, &i), &d) in out.iter_mut().zip(input).zip(self.shape.iter()) {
+            let cutoff = (d - 1) / 2;
+            *o = if i <= cutoff {
+                i as isize
+            } else {
+                i as isize - d as isize
+            };
+        }
+    }
+
+
 }
 
 impl From<[usize;16]> for ArrayDim {
