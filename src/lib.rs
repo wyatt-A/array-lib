@@ -295,8 +295,13 @@ impl ArrayDim {
     }
 
     /// returns a buffer for index calculations filled with 0s
+    pub fn dim_buffer_signed() -> [isize; N_DIMS] {
+        [0isize;N_DIMS]
+    }
+
+    /// returns a buffer for index calculations filled with 0s
     pub fn dim_buffer() -> [usize; N_DIMS] {
-        [0;N_DIMS]
+        [0usize;N_DIMS]
     }
     
     pub fn strides(&self) -> &[usize; N_DIMS] {
