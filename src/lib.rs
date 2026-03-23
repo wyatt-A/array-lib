@@ -35,7 +35,7 @@ pub use cfl;
 pub use num_complex;
 
 use num_complex::Complex32;
-
+use num_traits::Zero;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -302,6 +302,10 @@ impl ArrayDim {
     /// returns a buffer for index calculations filled with 0s
     pub fn dim_buffer() -> [usize; N_DIMS] {
         [0usize;N_DIMS]
+    }
+
+    pub fn dim_buffer_t<T:Copy + Sized + Zero>() -> [T; N_DIMS] {
+        [T::zero();N_DIMS]
     }
     
     pub fn strides(&self) -> &[usize; N_DIMS] {
