@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
@@ -32,6 +33,13 @@ pub enum BrukerDataError {
     UnexpectedEOF(PathBuf),
     InconsistentArraySize{expected: usize, actual: usize},
     PV(PvError),
+}
+
+impl Display for BrukerDataError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use std::fmt::write;
+        write!(f, "{:?}", self)
+    }
 }
 
 impl From<PvError> for BrukerDataError {
