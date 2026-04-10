@@ -22,9 +22,7 @@ pub fn write_cfl(cfl_file_base_name:impl AsRef<Path>, data: &[Complex32], dims: 
 
 /// reads a contiguous slice from a cfl file. You must manually supply the starting offset and length of the
 /// buffer to copy into
-pub fn read_cfl_slice(cfl_file_base_name:impl AsRef<Path>,offset:usize,len:usize) -> Vec<Complex32> {
-    let mut buff = vec![Complex32::ZERO;len];
+pub fn read_cfl_slice(cfl_file_base_name:impl AsRef<Path>,offset:usize, buff:&mut [Complex32]){
     let r = cfl::CflReader::new(&cfl_file_base_name).unwrap();
     r.read_slice(offset,&mut buff).unwrap();
-    buff
 }
