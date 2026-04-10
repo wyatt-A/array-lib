@@ -24,5 +24,5 @@ pub fn write_cfl(cfl_file_base_name:impl AsRef<Path>, data: &[Complex32], dims: 
 /// buffer to copy into
 pub fn read_cfl_slice(cfl_file_base_name:impl AsRef<Path>,offset:usize, buff:&mut [Complex32]){
     let r = cfl::CflReader::new(&cfl_file_base_name).unwrap();
-    r.read_slice(offset,&mut buff).unwrap();
+    r.read_slice(offset,buff).unwrap();
 }
