@@ -164,6 +164,25 @@ mod tests {
         });
     }
 
+    #[test]
+    fn test_permute() {
+
+        let d = ArrayDim::from_shape(&[2,2,2]);
+        let mut x = d.alloc(0usize);
+        x.iter_mut().enumerate().for_each(|(i,x)| *x = i);
+
+        let mut dst = x.clone();
+
+        // identity permute
+        d.permute(&x,&mut dst,&[0,1,2]);
+        assert_eq!(dst,x);
+
+        // move x-axis to back
+        d.permute(&x,&mut dst,&[1,2,0]);
+        assert_eq!(&dst,&[0,2,4,6,1,3,5,7]);
+
+    }
+
 }
 
 /// Dimension definitions from BART. This encodes a 'meaning' for each array axis
@@ -268,8 +287,6 @@ impl From<&DimSize> for DimLabel {
         (*size).into()
     }
 }
-
-
 
 
 #[derive(Clone,Copy,Debug, Serialize, Deserialize)]
@@ -481,6 +498,57 @@ impl ArrayDim {
                 *x = src[src_addr];
             });
         }
+    }
+
+    /// Permute axes of an array, similar to MATLAB `permute`.
+    ///
+    /// `order[new_axis] = old_axis`
+    ///
+    /// Example:
+    /// original shape [x, y, z]
+    /// order = [1, 2, 0]
+    /// result shape   [y, z, x]
+    pub fn permute<T:Copy + Sized + Send + Sync>(
+        &self,
+        src: &[T],
+        dst: &mut [T],
+        order: &[usize],
+    ) -> ArrayDim {
+        let old_shape = self.shape_ns();
+        let ndim = old_shape.len();
+
+        assert_eq!(order.len(), ndim, "order length must match number of dimensions");
+        assert_eq!(src.len(), self.numel(), "src length must match dims.numel()");
+        assert_eq!(dst.len(), self.numel(), "dst length must match dims.numel()");
+
+        // Validate that `order` is a true permutation of 0..ndim
+        let mut seen = vec![false; ndim];
+        for &ax in order {
+            assert!(ax < ndim, "axis index out of bounds in permutation");
+            assert!(!seen[ax], "duplicate axis in permutation");
+            seen[ax] = true;
+        }
+
+        // Build new shape: new_shape[new_axis] = old_shape[old_axis]
+        let new_shape: Vec<usize> = order.iter().map(|&old_axis| old_shape[old_axis]).collect();
+        let new_dims = ArrayDim::from_shape(&new_shape);
+
+        dst.par_iter_mut().enumerate().for_each(|(dst_linear, out)| {
+            // Multi-index in permuted array
+            let new_idx_full = new_dims.calc_idx(dst_linear);
+
+            // Build corresponding source multi-index
+            // old_idx[old_axis] = new_idx[new_axis]
+            let mut old_idx = vec![0usize; ndim];
+            for (new_axis, &old_axis) in order.iter().enumerate() {
+                old_idx[old_axis] = new_idx_full[new_axis];
+            }
+
+            let src_linear = self.calc_addr(&old_idx);
+            *out = src[src_linear];
+        });
+
+        new_dims
     }
 
     /// return the shape with all singleton dimensions intact
