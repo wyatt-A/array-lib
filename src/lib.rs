@@ -550,7 +550,7 @@ impl ArrayDim {
 
         new_dims
     }
-
+    
     /// return the shape with all singleton dimensions intact
     pub fn shape(&self) -> &[usize; N_DIMS] {
         &self.shape
