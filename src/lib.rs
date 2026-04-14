@@ -454,6 +454,12 @@ impl ArrayDim {
             .map(|(i, _)| self.calc_idx(i))
     }
 
+    /// returns the max norm of complex array
+    pub fn max_norm_cf32(&self,x:&[Complex32]) -> f32 {
+        let r = x.par_iter().reduce_with(|a, b| if a.norm_sqr() >= b.norm_sqr() { a } else { b }).unwrap();
+        r.norm()
+    }
+
     /// performs a circular shift on src elements, writing into dst
     pub fn circshift<T:Sized + Copy + Send + Sync>(&self,shift:&[isize],src:&[T],dst: &mut [T]) {
         assert_eq!(src.len(), self.numel(), "src must be the same size as array");
